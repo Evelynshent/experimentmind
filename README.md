@@ -1,9 +1,9 @@
 # ExperimentMind
 
 ExperimentMind is a clean-room, independent open-source exploration of
-trustworthy experiment analysis. Phase 1 contains only a deterministic
-statistical foundation: a reproducible synthetic e-commerce experiment,
-standard statistical tests, and immutable structured Evidence.
+trustworthy experiment analysis. The current deterministic foundation contains
+a reproducible synthetic e-commerce experiment, standard statistical tests,
+immutable structured Evidence, and practical-significance classification.
 
 No LLM, decision policy, verifier, UI, database, or external integration is
 included in this phase.
@@ -36,7 +36,27 @@ and right-skewed.
 Every confidence interval covers the absolute effect, defined as treatment
 minus control. Relative effects are point estimates and are omitted when the
 control value is zero. The default significance level is 0.05; significance
-itself is not converted into a product recommendation in Phase 1.
+itself is not converted directly into a product recommendation.
+
+## Evidence classification
+
+Each metric records whether higher or lower values are favorable and a minimum
+meaningful absolute effect. A deterministic function combines that context
+with the effect, confidence interval, and p-value:
+
+- **Clearly positive:** statistically significant and favorable beyond the
+  meaningful-effect threshold
+- **Clearly negative:** statistically significant and unfavorable beyond the
+  threshold
+- **Negligible:** statistically significant but no larger than the threshold,
+  or not significant with the full confidence interval inside the threshold
+  bounds
+- **Uncertain:** the data cannot rule out a meaningful effect
+
+The synthetic experiment uses thresholds of $0.05 revenue per session, 0.2
+percentage points of conversion, and $0.02 shipping cost per session. These
+classifications remain evidence summaries; Phase 2 does not implement a
+shipping recommendation or decision policy.
 
 ## Run
 

@@ -3,7 +3,7 @@ import pytest
 from scipy import stats
 from statsmodels.stats.proportion import proportions_ztest
 
-from experimentmind.evidence import MetricType
+from experimentmind.evidence import MetricSpec, MetricType
 from experimentmind.statistics import (
     analyze_binary_metric,
     analyze_continuous_metric,
@@ -12,11 +12,17 @@ from experimentmind.statistics import (
 from experimentmind.synthetic import generate_shipping_threshold_experiment
 
 
+def spec(metric_name: str, *, higher_is_better: bool = True) -> MetricSpec:
+    return MetricSpec(metric_name, higher_is_better, meaningful_effect=0.01)
+
+
 def test_binary_metric_matches_library_reference_example() -> None:
     control = np.array([True] * 20 + [False] * 80)
     treatment = np.array([True] * 30 + [False] * 70)
 
-    result = analyze_binary_metric("converted", control, treatment)
+    result = analyze_binary_metric(
+        "converted", control, treatment, metric_spec=spec("converted")
+    )
     _, expected_p = proportions_ztest([30, 20], [100, 100])
 
     assert result.metric_type is MetricType.BINARY
@@ -35,7 +41,9 @@ def test_continuous_metric_matches_welch_reference_example() -> None:
     control = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
     treatment = np.array([2.0, 4.0, 6.0, 8.0, 10.0])
 
-    result = analyze_continuous_metric("value", control, treatment)
+    result = analyze_continuous_metric(
+        "value", control, treatment, metric_spec=spec("value")
+    )
     reference = stats.ttest_ind(treatment, control, equal_var=False)
 
     assert result.control_value == pytest.approx(3.0)
@@ -51,7 +59,9 @@ def test_negative_effect_direction_is_preserved() -> None:
     control = np.array([4.0, 5.0, 6.0, 7.0])
     treatment = np.array([1.0, 2.0, 3.0, 4.0])
 
-    result = analyze_continuous_metric("value", control, treatment)
+    result = analyze_continuous_metric(
+        "value", control, treatment, metric_spec=spec("value")
+    )
 
     assert result.absolute_effect < 0
     assert result.relative_effect is not None
@@ -62,7 +72,9 @@ def test_zero_control_value_has_no_relative_effect() -> None:
     control = np.array([-2.0, -1.0, 0.0, 1.0, 2.0])
     treatment = np.array([-1.0, 0.0, 1.0, 2.0, 3.0])
 
-    result = analyze_continuous_metric("value", control, treatment)
+    result = analyze_continuous_metric(
+        "value", control, treatment, metric_spec=spec("value")
+    )
 
     assert result.relative_effect is None
 
@@ -71,13 +83,18 @@ def test_zero_control_value_has_no_relative_effect() -> None:
 def test_invalid_alpha_is_rejected(alpha: float) -> None:
     values = np.array([1.0, 2.0])
     with pytest.raises(ValueError, match="alpha"):
-        analyze_continuous_metric("value", values, values, alpha=alpha)
+        analyze_continuous_metric(
+            "value", values, values, metric_spec=spec("value"), alpha=alpha
+        )
 
 
 def test_insufficient_samples_are_rejected() -> None:
     with pytest.raises(ValueError, match="at least two"):
         analyze_binary_metric(
-            "converted", np.array([True]), np.array([False, True])
+            "converted",
+            np.array([True]),
+            np.array([False, True]),
+            metric_spec=spec("converted"),
         )
 
 
@@ -87,12 +104,25 @@ def test_binary_metric_with_no_pooled_variance_is_rejected(outcome: bool) -> Non
     treatment = np.full(100, outcome, dtype=bool)
 
     with pytest.raises(ValueError, match="variance"):
-        analyze_binary_metric("converted", control, treatment)
+        analyze_binary_metric(
+            "converted", control, treatment, metric_spec=spec("converted")
+        )
 
 
 def test_zero_variance_in_both_groups_is_rejected() -> None:
     with pytest.raises(ValueError, match="variance"):
-        analyze_continuous_metric("value", np.ones(5), np.ones(5))
+        analyze_continuous_metric(
+            "value", np.ones(5), np.ones(5), metric_spec=spec("value")
+        )
+
+
+def test_metric_spec_name_must_match_metric_name() -> None:
+    values = np.array([1.0, 2.0, 3.0])
+
+    with pytest.raises(ValueError, match="name must match"):
+        analyze_continuous_metric(
+            "value", values, values + 1.0, metric_spec=spec("other")
+        )
 
 
 def test_synthetic_experiment_builds_complete_evidence() -> None:
