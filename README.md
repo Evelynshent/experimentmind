@@ -76,6 +76,32 @@ returns `TRADEOFF`: revenue per session is uncertain, conversion is clearly
 positive, and shipping cost per session is clearly negative. The policy and
 its rationale are computed by code; no LLM is involved.
 
+## Structured findings
+
+An optional LLM analyst can turn Evidence into typed observations and
+interpretations. It receives every metric value and the fixed deterministic
+recommendation, then returns Pydantic-validated findings through the OpenAI
+Responses API's Structured Outputs support. Every finding must name its
+Evidence references.
+
+The LLM never computes statistics or changes the recommendation. Findings are
+unverified AI output in this phase; deterministic finding verification belongs
+to a later phase.
+
+```python
+from experimentmind import generate_findings, recommend
+
+recommendation = recommend(evidence)
+findings = generate_findings(
+    evidence,
+    recommendation,
+    model="your-structured-output-capable-model",
+)
+```
+
+Set `OPENAI_API_KEY` in the environment before making a live API call. Tests
+use an injected fake client and never contact the API.
+
 ## Run
 
 ```bash
