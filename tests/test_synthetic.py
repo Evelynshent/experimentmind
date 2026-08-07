@@ -1,5 +1,6 @@
 import numpy as np
 
+from experimentmind.evidence import EvidenceClassification
 from experimentmind.statistics import analyze_experiment
 from experimentmind.synthetic import (
     CONTROL,
@@ -50,3 +51,15 @@ def test_fixed_demo_seed_encodes_a_nontrivial_tradeoff() -> None:
     assert metrics["shipping_cost_per_session"].p_value < evidence.alpha
     assert metrics["revenue_per_session"].confidence_interval[0] < 0
     assert metrics["revenue_per_session"].confidence_interval[1] > 0
+    assert (
+        metrics["revenue_per_session"].classification
+        is EvidenceClassification.UNCERTAIN
+    )
+    assert (
+        metrics["conversion_rate"].classification
+        is EvidenceClassification.CLEARLY_POSITIVE
+    )
+    assert (
+        metrics["shipping_cost_per_session"].classification
+        is EvidenceClassification.CLEARLY_NEGATIVE
+    )

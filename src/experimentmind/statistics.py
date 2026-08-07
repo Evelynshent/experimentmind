@@ -21,7 +21,8 @@ from statsmodels.stats.proportion import (
 )
 from statsmodels.stats.weightstats import CompareMeans, DescrStatsW
 
-from .evidence import Evidence, MetricEvidence, MetricType
+from .classification import classify_effect
+from .evidence import Evidence, MetricEvidence, MetricSpec, MetricType
 from .synthetic import CONTROL, EXPERIMENT_NAME, TREATMENT, Observations
 
 
@@ -49,11 +50,14 @@ def analyze_binary_metric(
     control: NDArray[np.bool_],
     treatment: NDArray[np.bool_],
     *,
+    metric_spec: MetricSpec,
     alpha: float = 0.05,
 ) -> MetricEvidence:
     """Analyze a binary metric using standard two-proportion methods."""
 
     _validate_alpha(alpha)
+    if metric_spec.metric_name != metric_name:
+        raise ValueError("metric_spec name must match metric_name")
     if len(control) < 2 or len(treatment) < 2:
         raise ValueError("each variant must contain at least two observations")
 
@@ -83,18 +87,27 @@ def analyze_binary_metric(
         alpha=alpha,
     )
 
+    confidence_interval = (float(ci_lower), float(ci_upper))
     return MetricEvidence(
         metric_name=metric_name,
         metric_type=MetricType.BINARY,
+        metric_spec=metric_spec,
         control_value=control_value,
         treatment_value=treatment_value,
         absolute_effect=absolute_effect,
         relative_effect=_relative_effect(control_value, absolute_effect),
-        confidence_interval=(float(ci_lower), float(ci_upper)),
+        confidence_interval=confidence_interval,
         confidence_level=1.0 - alpha,
         p_value=float(p_value),
         sample_size_control=len(control),
         sample_size_treatment=len(treatment),
+        classification=classify_effect(
+            absolute_effect=absolute_effect,
+            confidence_interval=confidence_interval,
+            p_value=float(p_value),
+            alpha=alpha,
+            metric_spec=metric_spec,
+        ),
     )
 
 
@@ -103,11 +116,14 @@ def analyze_continuous_metric(
     control: NDArray[np.float64],
     treatment: NDArray[np.float64],
     *,
+    metric_spec: MetricSpec,
     alpha: float = 0.05,
 ) -> MetricEvidence:
     """Analyze a continuous metric using Welch's unequal-variance test."""
 
     _validate_alpha(alpha)
+    if metric_spec.metric_name != metric_name:
+        raise ValueError("metric_spec name must match metric_name")
     if len(control) < 2 or len(treatment) < 2:
         raise ValueError("each variant must contain at least two observations")
     if not np.isfinite(control).all() or not np.isfinite(treatment).all():
@@ -128,18 +144,27 @@ def analyze_continuous_metric(
     if not math.isfinite(p_value):
         raise ValueError("metric variance is insufficient for inference")
 
+    confidence_interval = (float(ci_lower), float(ci_upper))
     return MetricEvidence(
         metric_name=metric_name,
         metric_type=MetricType.CONTINUOUS,
+        metric_spec=metric_spec,
         control_value=control_value,
         treatment_value=treatment_value,
         absolute_effect=absolute_effect,
         relative_effect=_relative_effect(control_value, absolute_effect),
-        confidence_interval=(float(ci_lower), float(ci_upper)),
+        confidence_interval=confidence_interval,
         confidence_level=1.0 - alpha,
         p_value=p_value,
         sample_size_control=len(control),
         sample_size_treatment=len(treatment),
+        classification=classify_effect(
+            absolute_effect=absolute_effect,
+            confidence_interval=confidence_interval,
+            p_value=p_value,
+            alpha=alpha,
+            metric_spec=metric_spec,
+        ),
     )
 
 
@@ -165,18 +190,36 @@ def analyze_experiment(
 
     metrics = (
         analyze_continuous_metric(
-            "revenue_per_session", revenue_control, revenue_treatment, alpha=alpha
+            "revenue_per_session",
+            revenue_control,
+            revenue_treatment,
+            metric_spec=MetricSpec(
+                metric_name="revenue_per_session",
+                higher_is_better=True,
+                meaningful_effect=0.05,
+            ),
+            alpha=alpha,
         ),
         analyze_binary_metric(
             "conversion_rate",
             conversion_control,
             conversion_treatment,
+            metric_spec=MetricSpec(
+                metric_name="conversion_rate",
+                higher_is_better=True,
+                meaningful_effect=0.002,
+            ),
             alpha=alpha,
         ),
         analyze_continuous_metric(
             "shipping_cost_per_session",
             shipping_control,
             shipping_treatment,
+            metric_spec=MetricSpec(
+                metric_name="shipping_cost_per_session",
+                higher_is_better=False,
+                meaningful_effect=0.02,
+            ),
             alpha=alpha,
         ),
     )
