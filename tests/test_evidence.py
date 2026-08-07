@@ -6,6 +6,7 @@ from experimentmind.evidence import (
     Evidence,
     EvidenceClassification,
     MetricEvidence,
+    MetricRole,
     MetricSpec,
     MetricType,
 )
@@ -15,7 +16,9 @@ def sample_metric() -> MetricEvidence:
     return MetricEvidence(
         metric_name="conversion_rate",
         metric_type=MetricType.BINARY,
-        metric_spec=MetricSpec("conversion_rate", True, 0.002),
+        metric_spec=MetricSpec(
+            "conversion_rate", MetricRole.SECONDARY, True, 0.002
+        ),
         control_value=0.10,
         treatment_value=0.12,
         absolute_effect=0.02,

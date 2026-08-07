@@ -22,7 +22,7 @@ from statsmodels.stats.proportion import (
 from statsmodels.stats.weightstats import CompareMeans, DescrStatsW
 
 from .classification import classify_effect
-from .evidence import Evidence, MetricEvidence, MetricSpec, MetricType
+from .evidence import Evidence, MetricEvidence, MetricRole, MetricSpec, MetricType
 from .synthetic import CONTROL, EXPERIMENT_NAME, TREATMENT, Observations
 
 
@@ -195,6 +195,7 @@ def analyze_experiment(
             revenue_treatment,
             metric_spec=MetricSpec(
                 metric_name="revenue_per_session",
+                role=MetricRole.PRIMARY,
                 higher_is_better=True,
                 meaningful_effect=0.05,
             ),
@@ -206,6 +207,7 @@ def analyze_experiment(
             conversion_treatment,
             metric_spec=MetricSpec(
                 metric_name="conversion_rate",
+                role=MetricRole.SECONDARY,
                 higher_is_better=True,
                 meaningful_effect=0.002,
             ),
@@ -217,6 +219,7 @@ def analyze_experiment(
             shipping_treatment,
             metric_spec=MetricSpec(
                 metric_name="shipping_cost_per_session",
+                role=MetricRole.GUARDRAIL,
                 higher_is_better=False,
                 meaningful_effect=0.02,
             ),

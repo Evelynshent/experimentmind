@@ -3,7 +3,7 @@ import pytest
 from scipy import stats
 from statsmodels.stats.proportion import proportions_ztest
 
-from experimentmind.evidence import MetricSpec, MetricType
+from experimentmind.evidence import MetricRole, MetricSpec, MetricType
 from experimentmind.statistics import (
     analyze_binary_metric,
     analyze_continuous_metric,
@@ -13,7 +13,12 @@ from experimentmind.synthetic import generate_shipping_threshold_experiment
 
 
 def spec(metric_name: str, *, higher_is_better: bool = True) -> MetricSpec:
-    return MetricSpec(metric_name, higher_is_better, meaningful_effect=0.01)
+    return MetricSpec(
+        metric_name,
+        MetricRole.SECONDARY,
+        higher_is_better,
+        meaningful_effect=0.01,
+    )
 
 
 def test_binary_metric_matches_library_reference_example() -> None:

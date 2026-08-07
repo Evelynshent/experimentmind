@@ -1,7 +1,7 @@
 import pytest
 
 from experimentmind.classification import classify_effect
-from experimentmind.evidence import EvidenceClassification, MetricSpec
+from experimentmind.evidence import EvidenceClassification, MetricRole, MetricSpec
 
 
 @pytest.mark.parametrize(
@@ -32,7 +32,9 @@ def test_classification_truth_table(
         confidence_interval=interval,
         p_value=p_value,
         alpha=0.05,
-        metric_spec=MetricSpec("metric", higher_is_better, meaningful_effect=0.10),
+        metric_spec=MetricSpec(
+            "metric", MetricRole.SECONDARY, higher_is_better, meaningful_effect=0.10
+        ),
     )
 
     assert result is expected
@@ -51,5 +53,5 @@ def test_invalid_classification_inputs_are_rejected(
             confidence_interval=interval,
             p_value=0.5,
             alpha=0.05,
-            metric_spec=MetricSpec("metric", True, threshold),
+            metric_spec=MetricSpec("metric", MetricRole.SECONDARY, True, threshold),
         )
