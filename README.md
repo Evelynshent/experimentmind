@@ -55,8 +55,26 @@ with the effect, confidence interval, and p-value:
 
 The synthetic experiment uses thresholds of $0.05 revenue per session, 0.2
 percentage points of conversion, and $0.02 shipping cost per session. These
-classifications remain evidence summaries; Phase 2 does not implement a
-shipping recommendation or decision policy.
+classifications remain deterministic evidence summaries.
+
+## Decision policy
+
+Metrics are labeled primary, secondary, or guardrail. One explicit,
+priority-ordered policy converts their classifications into `SHIP`,
+`DO_NOT_SHIP`, `COLLECT_MORE_DATA`, or `TRADEOFF`:
+
+1. A clearly negative primary metric means do not ship.
+2. A clearly negative guardrail with countervailing positive primary or
+   secondary evidence is a tradeoff requiring human judgment.
+3. A clearly negative guardrail without positive evidence means do not ship.
+4. A clearly positive primary metric with no harmed guardrail means ship.
+5. A negligible primary effect means do not ship.
+6. An uncertain primary effect means collect more data.
+
+Secondary metrics cannot independently trigger shipping. The seeded experiment
+returns `TRADEOFF`: revenue per session is uncertain, conversion is clearly
+positive, and shipping cost per session is clearly negative. The policy and
+its rationale are computed by code; no LLM is involved.
 
 ## Run
 

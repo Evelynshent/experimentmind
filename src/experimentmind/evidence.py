@@ -20,11 +20,20 @@ class EvidenceClassification(str, Enum):
     UNCERTAIN = "uncertain"
 
 
+class MetricRole(str, Enum):
+    """A metric's role in the deterministic decision policy."""
+
+    PRIMARY = "primary"
+    SECONDARY = "secondary"
+    GUARDRAIL = "guardrail"
+
+
 @dataclass(frozen=True)
 class MetricSpec:
     """Decision context needed to interpret one metric's effect."""
 
     metric_name: str
+    role: MetricRole
     higher_is_better: bool
     meaningful_effect: float
 

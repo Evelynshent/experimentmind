@@ -1,6 +1,7 @@
 import numpy as np
 
 from experimentmind.evidence import EvidenceClassification
+from experimentmind.policy import Decision, recommend
 from experimentmind.statistics import analyze_experiment
 from experimentmind.synthetic import (
     CONTROL,
@@ -63,3 +64,4 @@ def test_fixed_demo_seed_encodes_a_nontrivial_tradeoff() -> None:
         metrics["shipping_cost_per_session"].classification
         is EvidenceClassification.CLEARLY_NEGATIVE
     )
+    assert recommend(evidence).decision is Decision.TRADEOFF
