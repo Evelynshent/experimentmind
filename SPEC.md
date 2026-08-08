@@ -583,3 +583,114 @@ The spec contains 7 source files, ~7 dataclasses, one LLM call, one decision mat
 ### Build Recommendation: **READY TO BUILD**
 
 The design is small, the thesis is clear, and the source fingerprint risk is low. The three corrections in this revision strengthen the scientific signal (practical significance replaces p-value-driven decisions, epistemic conservatism in interpretation verification, no uncalibrated confidence scores) without adding scope. The main execution risk is prompt engineering: getting the LLM to produce well-structured findings with accurate evidence references in a single call.
+
+---
+
+# V2 Approved Extension — Experiment Investigation
+
+This section extends the V1 specification without replacing it. All V1 trust
+boundaries and behavior remain normative unless this section explicitly adds or
+overrides a requirement.
+
+## V2 thesis
+
+ExperimentMind should demonstrate investigation and decision reasoning, not
+only experiment readout generation. It must recognize when top-line evidence is
+insufficient, identify scientifically valid additional analyses, execute those
+analyses deterministically, compare competing hypotheses, and keep observed
+evidence separate from unproven mechanisms.
+
+## Scope
+
+V2 adds exactly three reproducible synthetic e-commerce scenarios:
+
+1. A clear checkout win for which no further investigation is necessary.
+2. The V1 free-shipping tradeoff, for which revenue decomposition is useful.
+3. A recommendation-ranking change whose neutral top-line result masks opposing
+   effects for the pre-specified `user_tenure` segments.
+
+V2 supports only two additional deterministic analyses:
+
+- treatment-effect segmentation by a pre-specified dimension;
+- the identity `revenue per session = conversion rate × revenue per converted
+  session`.
+
+No generic analysis registry, arbitrary Python or SQL execution, causal graph,
+or autonomous agent loop is permitted.
+
+## Evidence sufficiency and planning
+
+Evidence sufficiency uses the small states `SUFFICIENT`, `INSUFFICIENT`, and
+`CONFLICTING`. Deterministic code identifies a finite set of scientifically
+valid candidate analyses from current Evidence and the experiment
+specification.
+
+If no candidate exists, investigation stops. If exactly one candidate exists,
+deterministic code may select it directly. If multiple candidates exist, an
+optional LLM may rank or select among only those candidates and explain which
+is likely to provide the most decision-relevant information. Its selection must
+match a supplied candidate exactly and is rejected otherwise. The LLM cannot
+invent analyses, dimensions, metrics, code, or queries.
+
+After the selected analysis runs, deterministic code reassesses whether the
+decision uncertainty was resolved. If it was not, the remaining valid candidate
+may run as a deterministic follow-up. Each candidate can run at most once; V2
+therefore executes no more than the two supported analyses.
+
+An inconclusive primary metric alone must not license unrestricted post-hoc
+segmentation. Segmentation is valid only for dimensions declared in advance by
+the synthetic experiment specification.
+
+## Investigation evidence
+
+Segment results must include the segment label, arm sample sizes, control and
+treatment values, treatment effect, confidence interval, p-value, and evidence
+classification. Decomposition must report both arm values for conversion and
+revenue per converted session, their treatment effects, recomposed revenue per
+session, and an arithmetic residual.
+
+All computation remains authoritative Python output. LLMs do not calculate or
+alter investigation evidence.
+
+## Hypotheses
+
+V2 represents competing hypotheses with a statement, supporting evidence,
+contradicting evidence, evidence needed next, and one of these statuses:
+
+- `CONSISTENT_WITH_EVIDENCE`
+- `INSUFFICIENT_EVIDENCE`
+- `CONTRADICTED`
+
+Consistency means only that cited evidence does not contradict the hypothesis;
+it does not establish a causal mechanism. Verification checks that cited
+evidence exists, that declared directions are not contradicted, and that the
+language remains appropriately uncertain. Hypotheses are never labeled
+verified.
+
+## Decision extension
+
+The V1 policy remains normative for top-line evidence. V2 adds
+`VALIDATE_HETEROGENEITY` when additional deterministic evidence reveals
+material opposing segment effects. Such heterogeneity blocks a global `SHIP`
+but does not establish that targeting is correct. The next action may recommend
+confirming the interaction and evaluating a targeted treatment.
+
+## Reporting and evaluation
+
+The V2 report must show initial evidence, sufficiency, candidate and selected
+analysis, investigation evidence, hypotheses with epistemic status, unresolved
+uncertainties, and the final deterministic recommendation as distinct layers.
+
+Normal scenario-driven tests must establish that:
+
+- the clear-win scenario stops without investigation;
+- the tradeoff scenario requests decomposition;
+- the hidden-heterogeneity scenario requests tenure segmentation;
+- segmentation and decomposition arithmetic are correct;
+- opposing segment effects change the final recommendation to
+  `VALIDATE_HETEROGENEITY`;
+- unsupported causal claims remain hypotheses rather than verified facts.
+
+V2 does not add an LLM judge, benchmark platform, database, RAG, memory,
+multi-agent system, generic tool framework, frontend, or production
+infrastructure.

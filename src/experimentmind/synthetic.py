@@ -1,10 +1,9 @@
-"""Reproducible synthetic data for one fictional e-commerce experiment."""
+"""Reproducible synthetic data for fictional e-commerce experiments."""
 
 from dataclasses import dataclass
 
 import numpy as np
 from numpy.typing import NDArray
-
 
 CONTROL = "control"
 TREATMENT = "treatment"
@@ -20,6 +19,7 @@ class Observations:
     converted: NDArray[np.bool_]
     revenue: NDArray[np.float64]
     shipping_cost: NDArray[np.float64]
+    user_tenure: NDArray[np.str_] | None = None
 
     def __post_init__(self) -> None:
         lengths = {
@@ -29,6 +29,8 @@ class Observations:
             len(self.revenue),
             len(self.shipping_cost),
         }
+        if self.user_tenure is not None:
+            lengths.add(len(self.user_tenure))
         if len(lengths) != 1:
             raise ValueError("all observation columns must have equal length")
 
@@ -52,9 +54,7 @@ def generate_shipping_threshold_experiment(
 
     rng = np.random.default_rng(seed)
     n = 2 * users_per_variant
-    variant = np.repeat(
-        np.array([CONTROL, TREATMENT]), users_per_variant
-    )
+    variant = np.repeat(np.array([CONTROL, TREATMENT]), users_per_variant)
     rng.shuffle(variant)
     treatment = variant == TREATMENT
 

@@ -21,3 +21,16 @@ and public/open-source knowledge.
   credentials, internal documentation, or proprietary terminology.
 - V1 adds no database, RAG system, memory, knowledge graph, agent orchestration,
   web application, or external data integration.
+
+## V2 audit
+
+- V2 requirements are recorded as an approved extension in `SPEC.md`; the V1
+  foundation remains normative.
+- The three experiment scenarios, segment labels, parameters, hypotheses, and
+  observations are fictional and independently designed.
+- Segmentation, two-arm inference, and multiplicative metric decomposition use
+  standard public statistical and arithmetic methods.
+- The investigation planner can choose only from deterministic, pre-specified
+  candidates and cannot generate executable code or queries.
+- V2 adds no employer material, causal engine, database, RAG, memory, knowledge
+  graph, multi-agent system, generic tool framework, UI, or infrastructure.

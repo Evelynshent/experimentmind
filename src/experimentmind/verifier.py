@@ -75,18 +75,14 @@ def _verify_observation(
 
         expected_significance = metric.p_value < alpha
         if claim.statistically_significant is not expected_significance:
-            errors.append(
-                f"{claim.metric_name} significance does not match Evidence."
-            )
+            errors.append(f"{claim.metric_name} significance does not match Evidence.")
         if claim.classification is not metric.classification:
             errors.append(
                 f"{claim.metric_name} classification does not match Evidence."
             )
 
     if errors:
-        return VerifiedFinding(
-            finding, VerificationStatus.INCORRECT, tuple(errors)
-        )
+        return VerifiedFinding(finding, VerificationStatus.INCORRECT, tuple(errors))
     return VerifiedFinding(
         finding,
         VerificationStatus.VERIFIED,
@@ -114,7 +110,9 @@ def _verify_interpretation(
         return VerifiedFinding(
             finding,
             VerificationStatus.CONTRADICTED_BY_EVIDENCE,
-            (f"Claimed direction contradicts Evidence for: {', '.join(contradictions)}.",),
+            (
+                f"Claimed direction contradicts Evidence for: {', '.join(contradictions)}.",
+            ),
         )
 
     observed_concepts = set(metrics)
@@ -130,8 +128,10 @@ def _verify_interpretation(
         finding,
         VerificationStatus.CONSISTENT_WITH_EVIDENCE,
         (
-            "Structured interpretation claims do not contradict Evidence; "
-            "causation is not established.",
+            (
+                "Structured interpretation claims do not contradict Evidence; "
+                "causation is not established."
+            ),
         ),
     )
 

@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 from enum import Enum
 
+from .analyses import SegmentationResult
 from .evidence import Evidence, EvidenceClassification, MetricRole
 
 
@@ -13,6 +14,7 @@ class Decision(str, Enum):
     DO_NOT_SHIP = "do_not_ship"
     COLLECT_MORE_DATA = "collect_more_data"
     TRADEOFF = "tradeoff"
+    VALIDATE_HETEROGENEITY = "validate_heterogeneity"
 
 
 @dataclass(frozen=True)
@@ -77,7 +79,9 @@ def recommend(evidence: Evidence) -> Recommendation:
     if primary_classification is EvidenceClassification.CLEARLY_POSITIVE:
         return Recommendation(
             Decision.SHIP,
-            (f"Primary metric {primary_name} is clearly positive with no harmed guardrail.",),
+            (
+                f"Primary metric {primary_name} is clearly positive with no harmed guardrail.",
+            ),
         )
 
     if primary_classification is EvidenceClassification.NEGLIGIBLE:
@@ -90,3 +94,42 @@ def recommend(evidence: Evidence) -> Recommendation:
         Decision.COLLECT_MORE_DATA,
         (f"Primary metric {primary_name} remains uncertain.",),
     )
+
+
+def recommend_after_investigation(
+    evidence: Evidence,
+    *,
+    segmentation: SegmentationResult | None = None,
+) -> Recommendation:
+    """Extend V1 policy only when material opposing segment effects exist."""
+
+    if segmentation is not None:
+        primary = [
+            metric
+            for metric in evidence.metrics
+            if metric.metric_spec.role is MetricRole.PRIMARY
+        ]
+        if len(primary) != 1:
+            raise ValueError("decision policy requires exactly one primary metric")
+        if segmentation.metric_name != primary[0].metric_name:
+            raise ValueError(
+                "heterogeneity policy requires primary-metric segmentation"
+            )
+        classifications = {
+            segment.metric.classification for segment in segmentation.segments
+        }
+        if {
+            EvidenceClassification.CLEARLY_POSITIVE,
+            EvidenceClassification.CLEARLY_NEGATIVE,
+        }.issubset(classifications):
+            return Recommendation(
+                Decision.VALIDATE_HETEROGENEITY,
+                (
+                    (
+                        f"Pre-specified {segmentation.dimension} segments have opposing "
+                        f"material effects for {segmentation.metric_name}."
+                    ),
+                    "Confirm the interaction before a global rollout or targeted treatment.",
+                ),
+            )
+    return recommend(evidence)

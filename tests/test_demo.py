@@ -52,9 +52,7 @@ def test_live_demo_path_verifies_structured_findings(monkeypatch, capsys) -> Non
             ]
         )
 
-    monkeypatch.setattr(
-        "experimentmind.demo.generate_findings", fake_generate_findings
-    )
+    monkeypatch.setattr("experimentmind.demo.generate_findings", fake_generate_findings)
 
     result = main(["--seed", "42", "--model", "test-model"])
     output = capsys.readouterr().out
@@ -62,3 +60,17 @@ def test_live_demo_path_verifies_structured_findings(monkeypatch, capsys) -> Non
     assert result == 0
     assert "### 1. ✓ VERIFIED" in output
     assert "Conversion increased significantly." in output
+
+
+def test_v2_flagship_demo_investigates_hidden_heterogeneity(capsys) -> None:
+    result = main(["--scenario", "hidden_heterogeneity", "--seed", "42"])
+    output = capsys.readouterr().out
+
+    assert result == 0
+    assert output.startswith("# ExperimentMind V2 — Recommendation ranking change")
+    assert "**INSUFFICIENT**" in output
+    assert "Segmentation by `user_tenure`" in output
+    assert "clearly_positive" in output
+    assert "clearly_negative" in output
+    assert "**VALIDATE_HETEROGENEITY**" in output
+    assert "post-treatment outcome" not in output

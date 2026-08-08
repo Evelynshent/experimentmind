@@ -2,6 +2,7 @@ from collections.abc import Iterable
 
 import pytest
 
+from experimentmind.analyses import SegmentationResult, SegmentEvidence
 from experimentmind.evidence import (
     Evidence,
     EvidenceClassification,
@@ -10,7 +11,7 @@ from experimentmind.evidence import (
     MetricSpec,
     MetricType,
 )
-from experimentmind.policy import Decision, recommend
+from experimentmind.policy import Decision, recommend, recommend_after_investigation
 
 
 def metric(
@@ -77,7 +78,10 @@ UNCERTAIN = EvidenceClassification.UNCERTAIN
             Decision.SHIP,
         ),
         ([metric("primary", MetricRole.PRIMARY, NEGLIGIBLE)], Decision.DO_NOT_SHIP),
-        ([metric("primary", MetricRole.PRIMARY, UNCERTAIN)], Decision.COLLECT_MORE_DATA),
+        (
+            [metric("primary", MetricRole.PRIMARY, UNCERTAIN)],
+            Decision.COLLECT_MORE_DATA,
+        ),
         (
             [
                 metric("primary", MetricRole.PRIMARY, UNCERTAIN),
@@ -132,3 +136,25 @@ def test_tradeoff_rationale_names_benefit_and_harmed_guardrail() -> None:
     assert recommendation.decision is Decision.TRADEOFF
     assert "conversion" in recommendation.rationale[0]
     assert "shipping_cost" in recommendation.rationale[1]
+
+
+def test_heterogeneity_override_requires_primary_metric() -> None:
+    top_line = evidence(
+        [
+            metric("revenue", MetricRole.PRIMARY, UNCERTAIN),
+            metric("conversion", MetricRole.SECONDARY, UNCERTAIN),
+        ]
+    )
+    positive = metric("conversion", MetricRole.SECONDARY, POSITIVE)
+    negative = metric("conversion", MetricRole.SECONDARY, NEGATIVE)
+    segmentation = SegmentationResult(
+        "conversion",
+        "user_tenure",
+        (
+            SegmentEvidence("user_tenure", "new", positive),
+            SegmentEvidence("user_tenure", "existing", negative),
+        ),
+    )
+
+    with pytest.raises(ValueError, match="primary-metric"):
+        recommend_after_investigation(top_line, segmentation=segmentation)

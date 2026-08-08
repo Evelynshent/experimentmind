@@ -1,4 +1,4 @@
 interface:
   display_name: "ExperimentMind"
-  short_description: "Run trustworthy e-commerce experiment analysis"
-  default_prompt: "Use $experimentmind to run and interpret the synthetic experiment."
+  short_description: "Investigate experiments with bounded AI reasoning"
+  default_prompt: "Use $experimentmind to investigate the flagship synthetic experiment and explain what remains uncertain."

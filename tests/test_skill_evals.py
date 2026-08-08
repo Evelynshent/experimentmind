@@ -1,13 +1,8 @@
 import json
 from pathlib import Path
 
-
 EVAL_CASES = (
-    Path(__file__).parents[1]
-    / "skills"
-    / "experimentmind"
-    / "evals"
-    / "cases.json"
+    Path(__file__).parents[1] / "skills" / "experimentmind" / "evals" / "cases.json"
 )
 
 
@@ -24,6 +19,10 @@ def test_skill_eval_cases_are_well_formed_and_cover_core_boundaries() -> None:
         "recommendation-integrity",
         "live-api-consent",
         "clean-room-scope",
+        "clear-win-restraint",
+        "bounded-multiple-candidates",
+        "heterogeneity-conservatism",
+        "hypothesis-epistemics",
     }
 
     assert len(case_ids) == len(cases)

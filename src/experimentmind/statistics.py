@@ -11,6 +11,7 @@ effects because every randomized session remains in its assigned arm.
 """
 
 import math
+from typing import TYPE_CHECKING
 
 import numpy as np
 from numpy.typing import NDArray
@@ -24,6 +25,9 @@ from statsmodels.stats.weightstats import CompareMeans, DescrStatsW
 from .classification import classify_effect
 from .evidence import Evidence, MetricEvidence, MetricRole, MetricSpec, MetricType
 from .synthetic import CONTROL, EXPERIMENT_NAME, TREATMENT, Observations
+
+if TYPE_CHECKING:
+    from .scenarios import ExperimentScenario
 
 
 def _validate_alpha(alpha: float) -> None:
@@ -168,9 +172,7 @@ def analyze_continuous_metric(
     )
 
 
-def analyze_experiment(
-    observations: Observations, *, alpha: float = 0.05
-) -> Evidence:
+def analyze_experiment(observations: Observations, *, alpha: float = 0.05) -> Evidence:
     """Convert raw session observations into immutable statistical evidence."""
 
     _validate_alpha(alpha)
@@ -227,3 +229,52 @@ def analyze_experiment(
         ),
     )
     return Evidence(experiment_name=EXPERIMENT_NAME, metrics=metrics, alpha=alpha)
+
+
+def analyze_scenario(
+    scenario: "ExperimentScenario", *, alpha: float = 0.05
+) -> Evidence:
+    """Analyze a declared V2 scenario using the existing metric methods."""
+
+    from .scenarios import ExperimentScenario
+
+    if not isinstance(scenario, ExperimentScenario):
+        raise TypeError("scenario must be an ExperimentScenario")
+    _validate_alpha(alpha)
+    observations = scenario.observations
+    known_variants = np.isin(observations.variant, [CONTROL, TREATMENT])
+    if not known_variants.all():
+        raise ValueError("variant must be either 'control' or 'treatment'")
+
+    values = {
+        "revenue_per_session": observations.revenue,
+        "conversion_rate": observations.converted,
+        "shipping_cost_per_session": observations.shipping_cost,
+    }
+    metrics: list[MetricEvidence] = []
+    for metric_spec in scenario.metric_specs:
+        try:
+            metric_values = values[metric_spec.metric_name]
+        except KeyError as error:
+            raise ValueError(
+                f"unsupported metric: {metric_spec.metric_name}"
+            ) from error
+        control, treatment = _split(metric_values, observations.variant)
+        if metric_spec.metric_name == "conversion_rate":
+            result = analyze_binary_metric(
+                metric_spec.metric_name,
+                control,
+                treatment,
+                metric_spec=metric_spec,
+                alpha=alpha,
+            )
+        else:
+            result = analyze_continuous_metric(
+                metric_spec.metric_name,
+                control,
+                treatment,
+                metric_spec=metric_spec,
+                alpha=alpha,
+            )
+        metrics.append(result)
+    return Evidence(scenario.name, tuple(metrics), alpha)

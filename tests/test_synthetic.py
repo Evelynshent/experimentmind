@@ -41,9 +41,7 @@ def test_observation_constraints_and_balanced_assignment() -> None:
 
 
 def test_fixed_demo_seed_encodes_a_nontrivial_tradeoff() -> None:
-    evidence = analyze_experiment(
-        generate_shipping_threshold_experiment(seed=42)
-    )
+    evidence = analyze_experiment(generate_shipping_threshold_experiment(seed=42))
     metrics = {metric.metric_name: metric for metric in evidence.metrics}
 
     assert metrics["conversion_rate"].absolute_effect > 0
