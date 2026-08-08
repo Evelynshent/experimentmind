@@ -122,6 +122,22 @@ verified_findings = verify_findings(findings.findings, evidence)
 Set `OPENAI_API_KEY` in the environment before making a live API call. Tests
 use an injected fake client and never contact the API.
 
+## Markdown report
+
+A pure renderer combines Evidence, verified findings, and the deterministic
+recommendation into a Markdown report. Computed facts, AI-generated statements,
+verification verdicts, and policy output appear in separate labeled sections.
+
+```python
+from experimentmind import render_report
+
+report = render_report(evidence, verified_findings, recommendation)
+print(report)
+```
+
+Rendering performs no statistical calculations, model calls, or verification.
+It only formats the existing authoritative objects for human review.
+
 ## Run
 
 ```bash

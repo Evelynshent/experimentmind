@@ -20,6 +20,7 @@ from .findings import (
     MetricClaim,
 )
 from .policy import Decision, Recommendation, recommend
+from .report import render_report
 from .statistics import analyze_experiment
 from .synthetic import Observations, generate_shipping_threshold_experiment
 from .verifier import (
@@ -54,6 +55,7 @@ __all__ = [
     "generate_shipping_threshold_experiment",
     "generate_findings",
     "recommend",
+    "render_report",
     "verify_finding",
     "verify_findings",
 ]
