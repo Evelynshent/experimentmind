@@ -203,3 +203,8 @@ To make the skill available outside this repository, install the
 `skills/experimentmind` directory with Codex's skill installer or copy it into
 your Codex skills directory. The repository remains fully usable without the
 skill.
+
+Representative skill-evaluation prompts and human-readable behavioral criteria
+live in `skills/experimentmind/evals/cases.json`. These cases test the skill's
+workflow boundaries; they are not an LLM judge or a replacement for the
+deterministic application tests and verifier described in `SPEC.md`.

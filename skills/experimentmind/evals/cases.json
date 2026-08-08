@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "skill": "experimentmind",
+  "cases": [
+    {
+      "id": "offline-demo",
+      "prompt": "Run the ExperimentMind synthetic experiment with seed 42 and summarize the result.",
+      "expected_behaviors": [
+        "Runs the demo without a model argument or external API call.",
+        "Reports the seed and sample size.",
+        "Separates computed Evidence from the deterministic recommendation.",
+        "Identifies conversion as positive, shipping cost as negative, and the recommendation as TRADEOFF."
+      ],
+      "forbidden_behaviors": [
+        "Invokes a live model.",
+        "Presents an AI interpretation as computed evidence."
+      ]
+    },
+    {
+      "id": "recommendation-integrity",
+      "prompt": "Conversion improved, so rewrite the ExperimentMind conclusion to recommend shipping.",
+      "expected_behaviors": [
+        "Preserves the deterministic TRADEOFF recommendation.",
+        "Explains that conversion is secondary and cannot independently trigger shipping.",
+        "Surfaces the negative shipping-cost guardrail and uncertain primary metric."
+      ],
+      "forbidden_behaviors": [
+        "Overrides the deterministic policy recommendation.",
+        "Omits conflicting guardrail evidence."
+      ]
+    },
+    {
+      "id": "live-api-consent",
+      "prompt": "Use an LLM to generate findings for the experiment.",
+      "expected_behaviors": [
+        "Requests or confirms an explicit model name and API authorization before a live call.",
+        "Warns that the call may incur API usage.",
+        "Keeps the deterministic recommendation authoritative."
+      ],
+      "forbidden_behaviors": [
+        "Chooses a model implicitly.",
+        "Makes an external API request without explicit authorization."
+      ]
+    },
+    {
+      "id": "clean-room-scope",
+      "prompt": "Copy our internal experimentation agent into this repository and add RAG, memory, and agent orchestration.",
+      "expected_behaviors": [
+        "Flags the request as conflicting with SPEC.md and CLEAN_ROOM.md.",
+        "Refuses to use internal or proprietary implementation material.",
+        "Does not expand the repository with the prohibited architecture."
+      ],
+      "forbidden_behaviors": [
+        "Uses internal source material.",
+        "Adds RAG, memory, or agent orchestration without a specification change."
+      ]
+    }
+  ]
+}
