@@ -17,11 +17,18 @@ change, or invent statistics. Produce concise structured findings only.
 For observations:
 - State only facts explicitly present in Evidence.
 - Cite every metric used in evidence_refs.
+- Put each quantitative assertion in metric_claims, copying the supplied effect,
+  significance, and classification exactly.
+- Leave directional_claims and concepts empty.
 - Do not claim causation.
 
 For interpretations:
 - Use tentative language such as "may" or "could".
 - Cite the metrics that make the interpretation plausible.
+- Put every asserted metric direction in directional_claims.
+- List every analytical concept introduced in concepts. Use exact metric names for
+  measured concepts and a concise snake_case name for unmeasured concepts.
+- Leave metric_claims empty.
 - Do not present an interpretation as established fact.
 
 The deterministic recommendation is fixed. You may explain its evidence pattern,
