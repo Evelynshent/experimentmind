@@ -84,12 +84,31 @@ recommendation, then returns Pydantic-validated findings through the OpenAI
 Responses API's Structured Outputs support. Every finding must name its
 Evidence references.
 
-The LLM never computes statistics or changes the recommendation. Findings are
-unverified AI output in this phase; deterministic finding verification belongs
-to a later phase.
+The LLM never computes statistics or changes the recommendation.
+
+## Finding verification
+
+Each observation carries structured metric claims containing the asserted
+effect scale, value, significance, and classification. Each interpretation
+carries asserted metric directions and a list of introduced concepts. A pure
+Python verifier checks those fields against Evidence:
+
+- Observations become `VERIFIED`, `INCORRECT`, or `UNRESOLVED`.
+- Interpretations become `CONSISTENT_WITH_EVIDENCE`,
+  `CONTRADICTED_BY_EVIDENCE`, or `INSUFFICIENT_EVIDENCE`.
+
+Numerical claims use a documented 1% relative comparison tolerance. An
+interpretation is consistent only when its declared metric directions agree
+with Evidence and every declared concept corresponds to a measured metric.
+Consistency does not establish causation.
+
+The verifier checks structured assertions, not arbitrary prose semantics. This
+keeps verification deterministic and avoids fragile claim extraction, but it
+also means correctness depends on the structured fields faithfully expressing
+the accompanying statement.
 
 ```python
-from experimentmind import generate_findings, recommend
+from experimentmind import generate_findings, recommend, verify_findings
 
 recommendation = recommend(evidence)
 findings = generate_findings(
@@ -97,6 +116,7 @@ findings = generate_findings(
     recommendation,
     model="your-structured-output-capable-model",
 )
+verified_findings = verify_findings(findings.findings, evidence)
 ```
 
 Set `OPENAI_API_KEY` in the environment before making a live API call. Tests

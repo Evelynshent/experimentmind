@@ -9,7 +9,14 @@ from experimentmind.analyst import (
     format_analysis_input,
     generate_findings,
 )
-from experimentmind.findings import Finding, FindingBatch, FindingType
+from experimentmind.evidence import EvidenceClassification
+from experimentmind.findings import (
+    EffectScale,
+    Finding,
+    FindingBatch,
+    FindingType,
+    MetricClaim,
+)
 from experimentmind.policy import recommend
 from experimentmind.statistics import analyze_experiment
 from experimentmind.synthetic import generate_shipping_threshold_experiment
@@ -73,6 +80,17 @@ def test_generate_findings_makes_one_structured_api_call() -> None:
                 statement="Revenue remains uncertain.",
                 finding_type=FindingType.OBSERVATION,
                 evidence_refs=["revenue_per_session"],
+                metric_claims=[
+                    MetricClaim(
+                        metric_name="revenue_per_session",
+                        effect_scale=EffectScale.RELATIVE,
+                        effect_value=0.01,
+                        statistically_significant=False,
+                        classification=EvidenceClassification.UNCERTAIN,
+                    )
+                ],
+                directional_claims=[],
+                concepts=[],
             )
         ]
     )
