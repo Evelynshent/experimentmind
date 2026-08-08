@@ -1,12 +1,42 @@
 # ExperimentMind
 
 ExperimentMind is a clean-room, independent open-source exploration of
-trustworthy experiment analysis. The current deterministic foundation contains
-a reproducible synthetic e-commerce experiment, standard statistical tests,
-immutable structured Evidence, and practical-significance classification.
+trustworthy experiment analysis. It keeps computed facts, AI interpretations,
+and product decisions visibly separate:
 
-No LLM, decision policy, verifier, UI, database, or external integration is
-included in this phase.
+- Statistics and practical-significance classifications are computed by code.
+- A deterministic policy produces the recommendation.
+- An optional LLM produces typed findings without calculation authority.
+- A deterministic verifier checks structured claims against Evidence.
+- A Markdown report labels each layer for human review.
+
+## Quick start
+
+Install the package and test dependencies:
+
+```bash
+python -m pip install -e ".[test]"
+pytest
+```
+
+Run the complete deterministic path without a network connection or API key:
+
+```bash
+experimentmind --seed 42
+# Equivalent: python -m experimentmind.demo --seed 42
+```
+
+The offline report contains Evidence and the deterministic recommendation, with
+no AI findings. To include live structured findings, set an API key and choose
+a Structured-Outputs-capable model explicitly:
+
+```bash
+export OPENAI_API_KEY="your-api-key"
+experimentmind --seed 42 --model "your-model"
+```
+
+The live command can incur API usage. ExperimentMind never selects a model
+implicitly.
 
 ## Synthetic experiment
 
@@ -138,12 +168,7 @@ print(report)
 Rendering performs no statistical calculations, model calls, or verification.
 It only formats the existing authoritative objects for human review.
 
-## Run
-
-```bash
-python -m pip install -e ".[test]"
-pytest
-```
+## Library usage
 
 ```python
 from experimentmind import (
@@ -155,6 +180,14 @@ observations = generate_shipping_threshold_experiment(seed=42)
 evidence = analyze_experiment(observations)
 ```
 
+The optional live smoke test is skipped by default. Run it only when you intend
+to make a real API request:
+
+```bash
+EXPERIMENTMIND_RUN_LIVE_API=1 \
+OPENAI_MODEL="your-model" \
+pytest -m live_api tests/test_live_api.py
+```
+
 See `SPEC.md` for the broader project direction and `CLEAN_ROOM.md` for the
-clean-room constraints. Components described there but not present here belong
-to later phases.
+clean-room constraints.
