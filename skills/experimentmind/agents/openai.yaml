@@ -1,0 +1,4 @@
+interface:
+  display_name: "ExperimentMind"
+  short_description: "Run trustworthy e-commerce experiment analysis"
+  default_prompt: "Use $experimentmind to run and interpret the synthetic experiment."

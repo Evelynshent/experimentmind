@@ -191,3 +191,15 @@ pytest -m live_api tests/test_live_api.py
 
 See `SPEC.md` for the broader project direction and `CLEAN_ROOM.md` for the
 clean-room constraints.
+
+## Codex skill
+
+The repository includes a thin Codex workflow skill at
+`skills/experimentmind/SKILL.md`. It teaches Codex how to run and inspect the
+project while preserving the deterministic evidence boundaries; it does not
+duplicate the Python statistics or decision logic.
+
+To make the skill available outside this repository, install the
+`skills/experimentmind` directory with Codex's skill installer or copy it into
+your Codex skills directory. The repository remains fully usable without the
+skill.
