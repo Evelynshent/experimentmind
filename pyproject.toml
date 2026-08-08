@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "experimentmind"
 version = "0.1.0"
-description = "Deterministic statistical evidence for a synthetic e-commerce experiment"
+description = "Trust-separated analysis for a synthetic e-commerce experiment"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
@@ -16,6 +16,9 @@ dependencies = [
     "statsmodels>=0.14",
 ]
 
+[project.scripts]
+experimentmind = "experimentmind.demo:main"
+
 [project.optional-dependencies]
 test = ["pytest>=7.4"]
 
@@ -24,4 +27,5 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 addopts = "-ra"
+markers = ["live_api: makes an explicitly authorized OpenAI API request"]
 testpaths = ["tests"]
