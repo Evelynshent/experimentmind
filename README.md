@@ -1,14 +1,23 @@
 # ExperimentMind
 
-ExperimentMind is a clean-room, independent open-source exploration of
-trustworthy experiment analysis. It keeps computed facts, AI interpretations,
-and product decisions visibly separate:
+ExperimentMind explores how AI can participate in scientific investigation
+without becoming the source of quantitative truth. It keeps computed facts,
+AI reasoning, and product decisions visibly separate:
 
 - Statistics and practical-significance classifications are computed by code.
 - A deterministic policy produces the recommendation.
 - An optional LLM produces typed findings without calculation authority.
 - A deterministic verifier checks structured claims against Evidence.
 - A Markdown report labels each layer for human review.
+
+V2 adds a bounded investigation loop. The system can recognize that top-line
+evidence is insufficient, identify a finite set of scientifically valid next
+analyses, run the selected analysis with deterministic Python, and form
+competing hypotheses without presenting a mechanism as proven.
+
+The AI is not just writing the report. When multiple valid next analyses exist,
+it may rank only those pre-approved candidates by expected decision relevance.
+It cannot invent metrics, dimensions, Python, SQL, or analytical tools.
 
 ## Quick start
 
@@ -26,6 +35,22 @@ experimentmind --seed 42
 # Equivalent: python -m experimentmind.demo --seed 42
 ```
 
+Run the flagship V2 investigation offline:
+
+```bash
+experimentmind --scenario hidden_heterogeneity --seed 42
+```
+
+The top-line revenue result is uncertain. Deterministic planning identifies two
+valid analyses—tenure segmentation and revenue decomposition—and the offline
+fallback selects the pre-specified tenure analysis. It reveals a clearly
+positive effect for new users and a clearly negative effect for existing
+users, changing the final policy output to `VALIDATE_HETEROGENEITY`.
+
+That recommendation blocks a global rollout. It does not claim that targeting
+is ready; it calls for confirming the interaction before evaluating a targeted
+treatment.
+
 The offline report contains Evidence and the deterministic recommendation, with
 no AI findings. To include live structured findings, set an API key and choose
 a Structured-Outputs-capable model explicitly:
@@ -37,6 +62,38 @@ experimentmind --seed 42 --model "your-model"
 
 The live command can incur API usage. ExperimentMind never selects a model
 implicitly.
+
+For V2 scenarios, `--model` additionally allows the model to rank candidates
+when more than one valid analysis exists and to generate structured competing
+hypotheses. Candidate validation, analysis execution, hypothesis checks, and
+the recommendation remain deterministic.
+
+## V2 investigation scenarios
+
+| Scenario | Top-line pattern | Investigation behavior | Final decision |
+|---|---|---|---|
+| `clear_win` | Primary metric clearly positive | Stop; additional analysis is unnecessary | `SHIP` |
+| `shipping_tradeoff` | Conversion improves while shipping cost worsens | Decompose revenue into conversion × value per conversion | `TRADEOFF` |
+| `hidden_heterogeneity` | Overall revenue is inconclusive | Segment by pre-specified user tenure | `VALIDATE_HETEROGENEITY` |
+
+The only supported investigation tools are segmentation by a pre-specified
+dimension and one transparent revenue identity:
+
+```text
+revenue per session
+= conversion rate × revenue per converted session
+```
+
+Evidence sufficiency is classified as `SUFFICIENT`, `INSUFFICIENT`, or
+`CONFLICTING`. With multiple valid candidates, the optional model can rank
+them; with one candidate, deterministic logic selects it directly.
+If the first analysis leaves the decision unresolved, the remaining valid
+candidate may run once as a deterministic follow-up.
+
+Hypotheses cite top-line or investigation evidence and receive one of three
+limited statuses: `CONSISTENT_WITH_EVIDENCE`, `INSUFFICIENT_EVIDENCE`, or
+`CONTRADICTED`. Consistency means only that observed directions do not reject
+the explanation. It is not causal verification.
 
 ## Synthetic experiment
 
@@ -196,8 +253,9 @@ clean-room constraints.
 
 The repository includes a thin Codex workflow skill at
 `skills/experimentmind/SKILL.md`. It teaches Codex how to run and inspect the
-project while preserving the deterministic evidence boundaries; it does not
-duplicate the Python statistics or decision logic.
+project and conduct bounded scientific investigation while preserving the
+deterministic evidence boundaries; it does not duplicate the Python statistics
+or decision logic.
 
 To make the skill available outside this repository, install the
 `skills/experimentmind` directory with Codex's skill installer or copy it into

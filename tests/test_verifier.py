@@ -87,9 +87,7 @@ def interpretation(
 def test_correct_observation_is_verified(
     evidence: Evidence, effect_scale: EffectScale
 ) -> None:
-    result = verify_finding(
-        observation(evidence, effect_scale=effect_scale), evidence
-    )
+    result = verify_finding(observation(evidence, effect_scale=effect_scale), evidence)
 
     assert result.status is VerificationStatus.VERIFIED
 
@@ -171,7 +169,9 @@ def test_undefined_relative_effect_is_incorrect(evidence: Evidence) -> None:
     )
 
 
-def test_consistent_interpretation_is_labeled_conservatively(evidence: Evidence) -> None:
+def test_consistent_interpretation_is_labeled_conservatively(
+    evidence: Evidence,
+) -> None:
     result = verify_finding(interpretation(), evidence)
 
     assert result.status is VerificationStatus.CONSISTENT_WITH_EVIDENCE
@@ -179,9 +179,7 @@ def test_consistent_interpretation_is_labeled_conservatively(evidence: Evidence)
 
 
 def test_directional_contradiction_is_detected(evidence: Evidence) -> None:
-    result = verify_finding(
-        interpretation(direction=Direction.DECREASED), evidence
-    )
+    result = verify_finding(interpretation(direction=Direction.DECREASED), evidence)
 
     assert result.status is VerificationStatus.CONTRADICTED_BY_EVIDENCE
 
@@ -229,10 +227,6 @@ def test_batch_verification_preserves_order(evidence: Evidence) -> None:
 
 
 @pytest.mark.parametrize("tolerance", [-0.1, float("inf"), float("nan")])
-def test_invalid_tolerance_is_rejected(
-    evidence: Evidence, tolerance: float
-) -> None:
+def test_invalid_tolerance_is_rejected(evidence: Evidence, tolerance: float) -> None:
     with pytest.raises(ValueError, match="relative_tolerance"):
-        verify_finding(
-            observation(evidence), evidence, relative_tolerance=tolerance
-        )
+        verify_finding(observation(evidence), evidence, relative_tolerance=tolerance)

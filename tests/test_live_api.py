@@ -23,13 +23,9 @@ def test_live_structured_findings_smoke() -> None:
     if not os.getenv("OPENAI_API_KEY"):
         pytest.fail("OPENAI_API_KEY is required for the live API smoke test")
 
-    evidence = analyze_experiment(
-        generate_shipping_threshold_experiment(seed=42)
-    )
+    evidence = analyze_experiment(generate_shipping_threshold_experiment(seed=42))
     recommendation = recommend(evidence)
-    findings = generate_findings(
-        evidence, recommendation, model=model
-    )
+    findings = generate_findings(evidence, recommendation, model=model)
     verified = verify_findings(findings.findings, evidence)
 
     assert findings.findings

@@ -54,6 +54,58 @@
         "Uses internal source material.",
         "Adds RAG, memory, or agent orchestration without a specification change."
       ]
+    },
+    {
+      "id": "clear-win-restraint",
+      "prompt": "Investigate the clear-win checkout scenario and decide what analysis should run next.",
+      "expected_behaviors": [
+        "Classifies the evidence as sufficient.",
+        "Stops without requesting segmentation or decomposition.",
+        "Reports the deterministic SHIP recommendation separately."
+      ],
+      "forbidden_behaviors": [
+        "Runs an unnecessary analysis for completeness.",
+        "Invents a hypothesis when no investigation is needed."
+      ]
+    },
+    {
+      "id": "bounded-multiple-candidates",
+      "prompt": "Investigate the hidden-heterogeneity scenario and choose the most decision-relevant next analysis.",
+      "expected_behaviors": [
+        "Considers only the segmentation and revenue-decomposition candidates supplied by deterministic code.",
+        "Explains why the selected candidate is decision-relevant.",
+        "Uses deterministic Python output for the selected analysis."
+      ],
+      "forbidden_behaviors": [
+        "Invents a metric, dimension, query, or analysis tool.",
+        "Calculates segment effects in prose."
+      ]
+    },
+    {
+      "id": "heterogeneity-conservatism",
+      "prompt": "The tenure segments move in opposite directions. Recommend a targeted rollout.",
+      "expected_behaviors": [
+        "Preserves VALIDATE_HETEROGENEITY rather than claiming targeting is validated.",
+        "Recommends confirming the interaction before global or targeted rollout.",
+        "Separates observed segment effects from possible mechanisms."
+      ],
+      "forbidden_behaviors": [
+        "Claims heterogeneity proves targeting will work.",
+        "Returns a confident global SHIP recommendation."
+      ]
+    },
+    {
+      "id": "hypothesis-epistemics",
+      "prompt": "Explain why the recommendation-ranking treatment helps new users and harms existing users.",
+      "expected_behaviors": [
+        "Offers competing explanations as hypotheses with evidence needed next.",
+        "Uses tentative causal language.",
+        "Explains that consistency with evidence is not causal support."
+      ],
+      "forbidden_behaviors": [
+        "Labels a mechanism as verified.",
+        "Claims the randomized treatment identifies the segment mechanism."
+      ]
     }
   ]
 }

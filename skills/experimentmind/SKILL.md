@@ -1,63 +1,58 @@
 ---
 name: experimentmind
-description: Run, inspect, and explain the ExperimentMind synthetic e-commerce experiment while preserving its deterministic evidence, verification, and decision boundaries. Use when working in the ExperimentMind repository to execute the demo, interpret its report, inspect experiment evidence, troubleshoot the analysis pipeline, or make scoped changes governed by SPEC.md and CLEAN_ROOM.md.
+description: Investigate controlled experiments with ExperimentMind while preserving deterministic evidence and decision boundaries. Use when running or interpreting ExperimentMind scenarios, assessing whether top-line evidence is sufficient, selecting among supported segmentation or revenue-decomposition analyses, comparing competing hypotheses, verifying evidence-backed claims, or making scoped repository changes governed by SPEC.md and CLEAN_ROOM.md.
 ---
 
 # ExperimentMind
 
-Use the repository's Python implementation as the sole computational authority. Keep this skill as workflow guidance; do not reproduce statistics, thresholds, classifications, verification, or decision logic in the skill.
+Use Python output as the sole quantitative authority. Use AI judgment to frame unresolved questions, rank only valid candidate analyses, and express competing hypotheses—not to calculate evidence or choose policy outcomes.
 
-## Establish scope
+## Investigate scientifically
 
-1. Locate the repository root containing `SPEC.md`, `CLEAN_ROOM.md`, and `pyproject.toml`.
-2. Read `SPEC.md` and `CLEAN_ROOM.md` before changing project behavior.
-3. Treat `SPEC.md` as the only project-specific source of truth.
-4. Flag conflicts between the user's request and the specification instead of silently expanding scope.
-5. Never use employer, proprietary, or remembered internal implementations, data, prompts, or documentation.
+1. Read `SPEC.md` and `CLEAN_ROOM.md` before changing behavior.
+2. State the experiment hypothesis, primary metric, supporting metrics, guardrails, and pre-specified effect modifiers.
+3. Inspect statistical and practical significance together.
+4. Stop when evidence is sufficient; do not investigate for appearance or completeness.
+5. When evidence is conflicting or insufficient, obtain valid candidates from deterministic code.
+6. If one candidate exists, run it directly. If several exist, rank only those candidates by likely decision relevance.
+7. Execute segmentation or revenue decomposition through the repository's Python functions. Never calculate results in prose or invent another tool.
+8. If the first analysis leaves material uncertainty, run the remaining valid candidate at most once.
+9. Compare explanations using supporting, contradicting, and missing evidence.
+10. Label mechanisms as hypotheses. Treat `CONSISTENT_WITH_EVIDENCE` as non-contradiction, never causal proof.
+11. Present unresolved material uncertainty and the deterministic recommendation separately.
 
-## Run the deterministic workflow
+## Run the workflow
 
-Install the local package with test dependencies when needed:
-
-```bash
-python -m pip install -e ".[test]"
-```
-
-Run the offline demo by default:
-
-```bash
-python -m experimentmind.demo --seed 42
-```
-
-Treat the resulting `Evidence` values and deterministic recommendation as authoritative. Explain treatment effects as treatment minus control. Distinguish computed evidence, deterministic classification, policy output, AI-generated findings, and verifier verdicts.
-
-## Use the optional model path
-
-Invoke a live model only when the user explicitly requests AI-generated findings and supplies or confirms both an API key and model name:
+Run the flagship investigation offline by default:
 
 ```bash
-python -m experimentmind.demo --seed 42 --model "MODEL_NAME"
+python -m experimentmind.demo --scenario hidden_heterogeneity --seed 42
 ```
 
-Warn that this command makes a paid external API request. Never choose a model implicitly. Never present generated findings as computed facts or allow them to replace the deterministic recommendation.
+Other supported scenarios are `clear_win` and `shipping_tradeoff`. Omit
+`--scenario` to run the preserved V1 demonstration.
 
-## Inspect or modify the project
+Use a live model only when the user explicitly authorizes API usage and names a model:
 
-- Prefer the smallest direct change that satisfies `SPEC.md`.
-- Preserve the typed `Evidence` object as the quantitative source of truth.
-- Use mature public statistical libraries rather than reimplementing statistical algorithms.
-- Keep deterministic calculations, LLM interpretation, verification, and reporting visibly separated.
-- Do not add services, agents, databases, RAG, memory, or infrastructure unless the specification and current user request explicitly place them in scope.
-- Add or update focused tests for behavior changes.
+```bash
+python -m experimentmind.demo --scenario hidden_heterogeneity --seed 42 --model "MODEL_NAME"
+```
 
-Run the default verification suite after changes:
+Warn that the live command can incur cost. Never choose a model implicitly.
+
+## Preserve boundaries
+
+- Segment only by dimensions declared before observing results.
+- Do not infer that heterogeneous effects validate targeting.
+- Do not override `VALIDATE_HETEROGENEITY`, `TRADEOFF`, or another policy result.
+- Do not present hypotheses as verified or causal.
+- Do not introduce employer or proprietary implementation material.
+- Do not add agents, RAG, memory, databases, arbitrary SQL, causal graphs, or infrastructure unless an approved specification explicitly changes scope.
+
+After repository changes, run:
 
 ```bash
 python -W error -m pytest
 ```
 
-The live API smoke test is opt-in. Do not run it unless the user explicitly authorizes a real request.
-
-## Report results
-
-State whether execution was offline or live, identify the seed and sample size, summarize the primary and guardrail evidence, and report the deterministic recommendation separately from any AI findings. Surface statistical assumptions and limitations when they affect interpretation.
+Do not run the opt-in live API smoke test without explicit authorization.

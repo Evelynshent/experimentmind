@@ -59,7 +59,9 @@ def test_analysis_input_contains_all_authoritative_fields() -> None:
         "shipping_cost_per_session",
     }
     conversion = metrics["conversion_rate"]
-    source = next(metric for metric in evidence.metrics if metric.metric_name == "conversion_rate")
+    source = next(
+        metric for metric in evidence.metrics if metric.metric_name == "conversion_rate"
+    )
     assert conversion["control_value"] == source.control_value
     assert conversion["treatment_value"] == source.treatment_value
     assert conversion["absolute_effect"] == source.absolute_effect
@@ -98,7 +100,10 @@ def test_generate_findings_makes_one_structured_api_call() -> None:
     input_before = format_analysis_input(evidence, recommendation)
 
     actual = generate_findings(
-        evidence, recommendation, model="test-model", client=client  # type: ignore[arg-type]
+        evidence,
+        recommendation,
+        model="test-model",
+        client=client,  # type: ignore[arg-type]
     )
 
     assert actual is expected
@@ -121,7 +126,10 @@ def test_generate_findings_rejects_empty_model_without_calling_api() -> None:
 
     with pytest.raises(ValueError, match="model"):
         generate_findings(
-            evidence, recommendation, model="  ", client=client  # type: ignore[arg-type]
+            evidence,
+            recommendation,
+            model="  ",
+            client=client,  # type: ignore[arg-type]
         )
 
     assert client.responses.arguments is None

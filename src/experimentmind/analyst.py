@@ -8,7 +8,6 @@ from .evidence import Evidence
 from .findings import FindingBatch
 from .policy import Recommendation
 
-
 SYSTEM_INSTRUCTIONS = """You are an experiment analyst.
 
 The supplied Evidence is the only source of quantitative truth. Never calculate,
@@ -36,9 +35,7 @@ but you must not replace or override it.
 """
 
 
-def format_analysis_input(
-    evidence: Evidence, recommendation: Recommendation
-) -> str:
+def format_analysis_input(evidence: Evidence, recommendation: Recommendation) -> str:
     """Serialize authoritative inputs without recomputing or rounding values."""
 
     payload = {
@@ -89,7 +86,10 @@ def generate_findings(
         model=model,
         input=[
             {"role": "system", "content": SYSTEM_INSTRUCTIONS},
-            {"role": "user", "content": format_analysis_input(evidence, recommendation)},
+            {
+                "role": "user",
+                "content": format_analysis_input(evidence, recommendation),
+            },
         ],
         text_format=FindingBatch,
     )

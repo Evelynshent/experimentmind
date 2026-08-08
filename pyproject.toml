@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "experimentmind"
-version = "0.1.0"
-description = "Trust-separated analysis for a synthetic e-commerce experiment"
+version = "0.2.0"
+description = "Trust-separated experiment investigation and decision reasoning"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
